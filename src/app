@@ -1,0 +1,202 @@
+// import React, { useState, useEffect } from "react";
+// import Wheel from "./components/Wheel";
+// import RecentNumbers from "./components/RecentNumbers";
+// import PatternAnalysis from "./components/PatternAnalysis";
+// import BettingSuggestions from "./components/BettingSuggestions";
+// import StatisticsDashboard from "./components/StatisticsDashboard";
+// import ManualInput from "./components/ManualInput";
+// import { detectPatterns, generateSuggestions } from "./utils/patternDetection";
+// import { rouletteNumbers } from "./constants/rouletteNumbers";
+
+// function App() {
+//   const [history, setHistory] = useState([]);
+//   const [patterns, setPatterns] = useState([]);
+//   const [suggestions, setSuggestions] = useState([]);
+//   const [isSpinning, setIsSpinning] = useState(false);
+//   const [stats, setStats] = useState({
+//     reds: 0,
+//     blacks: 0,
+//     greens: 0,
+//     evens: 0,
+//     odds: 0,
+//     highs: 0,
+//     lows: 0,
+//   });
+//   const [lastResult, setLastResult] = useState(null);
+
+//   // Update patterns and suggestions when history changes
+//   useEffect(() => {
+//     if (history.length > 4) {
+//       const newPatterns = detectPatterns(history);
+//       setPatterns(newPatterns);
+//       setSuggestions(generateSuggestions(newPatterns, history));
+//     }
+//   }, [history]);
+
+//   // Update statistics when history changes
+//   useEffect(() => {
+//     if (history.length > 0) {
+//       const lastNumber = history[0];
+//       const newStats = { ...stats };
+
+//       if (lastNumber.color === "red") newStats.reds++;
+//       if (lastNumber.color === "black") newStats.blacks++;
+//       if (lastNumber.color === "green") newStats.greens++;
+//       if (lastNumber.number !== 0 && lastNumber.number % 2 === 0)
+//         newStats.evens++;
+//       if (lastNumber.number % 2 === 1) newStats.odds++;
+//       if (lastNumber.number > 0 && lastNumber.number <= 18) newStats.lows++;
+//       if (lastNumber.number >= 19) newStats.highs++;
+
+//       setStats(newStats);
+//     }
+//   }, [history]);
+
+//   const spinRoulette = (number = null) => {
+//     if (isSpinning) return;
+
+//     setIsSpinning(true);
+
+//     // Generate the result first
+//     let newNumber;
+//     if (number !== null) {
+//       newNumber =
+//         rouletteNumbers.find((n) => n.number === number) ||
+//         rouletteNumbers[Math.floor(Math.random() * rouletteNumbers.length)];
+//     } else {
+//       const randomIndex = Math.floor(Math.random() * rouletteNumbers.length);
+//       newNumber = rouletteNumbers[randomIndex];
+//     }
+
+//     // Set the result that the wheel should animate to
+//     setLastResult(newNumber);
+//   };
+
+//   const handleSpinComplete = () => {
+//     // After the wheel animation completes, add the result to history
+//     if (lastResult) {
+//       setHistory((prev) => [lastResult, ...prev].slice(0, 50));
+//       setLastResult(null);
+//     }
+//     setIsSpinning(false);
+//   };
+
+//   const addManualNumber = (number) => {
+//     const rouletteNumber = rouletteNumbers.find((n) => n.number === number);
+//     if (rouletteNumber) {
+//       setHistory((prev) => [rouletteNumber, ...prev].slice(0, 50));
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white p-4">
+//       <div className="max-w-7xl mx-auto">
+//         <header className="text-center mb-6">
+//           <h1 className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-1">
+//             Roulette Pattern Analyzer
+//           </h1>
+//           <p className="text-gray-300 text-xs sm:text-sm">
+//             Analyze patterns and get betting suggestions
+//           </p>
+//         </header>
+
+//         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+//           {/* Left Column - Recent Numbers */}
+//           <div className="lg:col-span-1">
+//             <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//               <RecentNumbers history={history} />
+//             </div>
+//           </div>
+
+//           {/* Center Column - Wheel */}
+//           <div className="lg:col-span-2 flex justify-center items-start">
+//             <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//               <Wheel
+//                 isSpinning={isSpinning}
+//                 lastNumber={lastResult}
+//                 onSpin={spinRoulette}
+//                 onSpinComplete={handleSpinComplete}
+//               />
+//             </div>
+//           </div>
+
+//           {/* Right Column - Stats and Input */}
+//           <div className="lg:col-span-1 space-y-4">
+//             <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//               <StatisticsDashboard
+//                 stats={stats}
+//                 historyCount={history.length}
+//               />
+//             </div>
+//             <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//               <ManualInput
+//                 onAddNumber={addManualNumber}
+//                 onSpin={spinRoulette}
+//               />
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Bottom Row - Patterns and Suggestions */}
+//         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+//           <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//             <PatternAnalysis patterns={patterns} />
+//           </div>
+//           <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//             <BettingSuggestions suggestions={suggestions} history={history} />
+//           </div>
+//         </div>
+
+//         {/* Quick Stats Bar at Bottom */}
+//         {history.length > 0 && (
+//           <div className="bg-gray-800 rounded-xl shadow-lg p-4">
+//             <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 text-xs">
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Total</div>
+//                 <div className="font-bold text-white">{history.length}</div>
+//               </div>
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Last</div>
+//                 <div
+//                   className={`font-bold ${
+//                     history[0]?.color === "red"
+//                       ? "text-red-400"
+//                       : history[0]?.color === "black"
+//                       ? "text-white"
+//                       : "text-green-400"
+//                   }`}
+//                 >
+//                   {history[0]?.number}
+//                 </div>
+//               </div>
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Reds</div>
+//                 <div className="font-bold text-red-400">{stats.reds}</div>
+//               </div>
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Blacks</div>
+//                 <div className="font-bold text-white">{stats.blacks}</div>
+//               </div>
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Evens</div>
+//                 <div className="font-bold text-blue-400">{stats.evens}</div>
+//               </div>
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Odds</div>
+//                 <div className="font-bold text-purple-400">{stats.odds}</div>
+//               </div>
+//               <div className="bg-gray-700 p-2 rounded text-center">
+//                 <div className="text-gray-400">Patterns</div>
+//                 <div className="font-bold text-yellow-400">
+//                   {patterns.length}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default App;
