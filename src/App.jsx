@@ -178,6 +178,12 @@ export default function App() {
     console.log("Bet placed on:", betType);
   }, []);
 
+  // Remove the last spin from both history and prediction history
+  const removeLast = useCallback(() => {
+    setHistory((prev) => (prev.length > 0 ? prev.slice(1) : []));
+    setPredictionHistory((prev) => (prev.length > 0 ? prev.slice(1) : []));
+  }, []);
+
   const handleClear = useCallback(() => {
     lastSpinIdRef.current = null;
     lastAppendTimeRef.current = 0;
@@ -221,7 +227,14 @@ export default function App() {
           {/* Wheel — hidden on mobile, shown on md+ */}
           <div className="hidden md:flex lg:col-span-1 bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700 flex-col items-center">
             <RouletteWheel onSpinResult={handleSpinResult} size={240} />
-            <div className="flex justify-center mt-2">
+            <div className="flex justify-center gap-2 mt-2">
+              <button
+                onClick={removeLast}
+                className="px-3 py-1 bg-amber-600 text-white text-[11px] rounded-lg hover:bg-amber-500 transition-all"
+                title="Remove Last Result"
+              >
+                ↩ Remove Last
+              </button>
               <button
                 onClick={handleClear}
                 className="px-3 py-1 bg-red-600 text-white text-[11px] rounded-lg hover:bg-red-500 transition-all"
@@ -244,8 +257,15 @@ export default function App() {
               />
             </div>
 
-            {/* Mobile-only: Clear button */}
-            <div className="flex justify-center mt-2 md:hidden">
+            {/* Mobile-only: action buttons */}
+            <div className="flex justify-center gap-2 mt-2 md:hidden">
+              <button
+                onClick={removeLast}
+                className="px-3 py-1 bg-amber-600 text-white text-[11px] rounded-lg hover:bg-amber-500 transition-all"
+                title="Remove Last Result"
+              >
+                ↩ Remove Last
+              </button>
               <button
                 onClick={handleClear}
                 className="px-3 py-1 bg-red-600 text-white text-[11px] rounded-lg hover:bg-red-500 transition-all"

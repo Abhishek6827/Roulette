@@ -57,20 +57,20 @@ export default function QuickButtons({ onAddNumber, onBet, disabled = false }) {
     "flex items-center justify-center text-white text-sm font-medium rounded-md bg-black hover:bg-gray-900 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 h-full w-full px-3 shadow-lg";
 
   return (
-    <div className="w-full flex justify-center">
+    <div className="w-full flex justify-center overflow-x-auto">
       <motion.div
-        className="rounded-xl border-2 border-amber-500 p-4 bg-emerald-900 text-white shadow-2xl"
+        className="rounded-xl border-2 border-amber-500 p-2 sm:p-3 bg-emerald-900 text-white shadow-2xl w-full"
         aria-label="Roulette table"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Main grid: 60px (0) + 12 columns (numbers) + 80px (2 TO 1) */}
+        {/* Main grid — responsive columns and row height */}
         <div
-          className="grid gap-2"
+          className="grid gap-1 sm:gap-1.5"
           style={{
-            gridTemplateColumns: "60px repeat(12, minmax(0, 1fr)) 80px",
-            gridAutoRows: "46px",
+            gridTemplateColumns: "clamp(40px, 8vw, 50px) repeat(12, minmax(0, 1fr)) clamp(50px, 10vw, 65px)",
+            gridAutoRows: "clamp(36px, 5vw, 42px)",
           }}
         >
           {/* 0 (spans 3 rows) */}
