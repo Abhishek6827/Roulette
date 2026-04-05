@@ -216,65 +216,69 @@ export default function App() {
         ))}
       </div>
 
-      <div className="relative z-10 container mx-auto px-2 sm:px-3 py-2 sm:py-3 max-w-7xl">
+      <div className="relative z-10 container mx-auto px-2 sm:px-3 py-2 sm:py-3 max-w-6xl">
         <header className="text-center mb-2 sm:mb-3">
           <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
             Roulette Analyzer
           </h1>
         </header>
 
-        <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 mb-2 sm:mb-3">
-          <div className="flex flex-col gap-2 sm:gap-3 lg:w-[320px] lg:flex-shrink-0">
-            <div className="hidden md:flex bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700 flex-col items-center">
-              <RouletteWheel onSpinResult={handleSpinResult} size={220} />
+        <div className="flex flex-col gap-2 sm:gap-3">
+          {/* Row 1: Wheel + Board side by side */}
+          <div className="flex flex-col md:flex-row gap-2 sm:gap-3">
+            {/* Wheel — hidden on mobile */}
+            <div className="hidden md:flex bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700 flex-col items-center md:w-[260px] md:flex-shrink-0">
+              <RouletteWheel onSpinResult={handleSpinResult} size={200} />
               <div className="flex justify-center gap-2 mt-2">
                 <button
                   onClick={removeLast}
                   className="px-3 py-1 bg-amber-600 text-white text-[11px] rounded-lg hover:bg-amber-500 transition-all"
-                  title="Remove Last Result"
                 >
                   ↩ Remove Last
                 </button>
                 <button
                   onClick={handleClear}
                   className="px-3 py-1 bg-red-600 text-white text-[11px] rounded-lg hover:bg-red-500 transition-all"
-                  title="Clear All Data"
                 >
                   × Clear All
                 </button>
               </div>
             </div>
-            <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+            {/* Board */}
+            <div className="flex-1 bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+              <QuickButtons onAddNumber={addNumber} onBet={handleBet} />
+              {/* Mobile-only: action buttons */}
+              <div className="flex justify-center gap-2 mt-2 md:hidden">
+                <button
+                  onClick={removeLast}
+                  className="px-3 py-1 bg-amber-600 text-white text-[11px] rounded-lg hover:bg-amber-500 transition-all"
+                >
+                  ↩ Remove Last
+                </button>
+                <button
+                  onClick={handleClear}
+                  className="px-3 py-1 bg-red-600 text-white text-[11px] rounded-lg hover:bg-red-500 transition-all"
+                >
+                  × Clear All
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 2: History & Analytics (Left) + Prediction (Right) */}
+          <div className="flex flex-col md:flex-row gap-2 sm:gap-3">
+            <div className="flex-1 flex flex-col gap-2 sm:gap-3">
+              <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+                <RecentNumbers predictionHistory={predictionHistory} lossStreak={lossStreak} />
+              </div>
+              <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+                <AnalyticsDashboard history={history} prediction={prediction} />
+              </div>
+            </div>
+            <div className="md:w-[340px] md:flex-shrink-0 bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
               <PredictionPanel prediction={prediction} lossStreak={lossStreak} />
             </div>
           </div>
-
-          <div className="flex-1 bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
-            <QuickButtons onAddNumber={addNumber} onBet={handleBet} />
-            <div className="mt-2 sm:mt-3">
-              <RecentNumbers predictionHistory={predictionHistory} lossStreak={lossStreak} />
-            </div>
-            <div className="flex justify-center gap-2 mt-2 md:hidden">
-              <button
-                onClick={removeLast}
-                className="px-3 py-1 bg-amber-600 text-white text-[11px] rounded-lg hover:bg-amber-500 transition-all"
-                title="Remove Last Result"
-              >
-                ↩ Remove Last
-              </button>
-              <button
-                onClick={handleClear}
-                className="px-3 py-1 bg-red-600 text-white text-[11px] rounded-lg hover:bg-red-500 transition-all"
-                title="Clear All Data"
-              >
-                × Clear All
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
-          <AnalyticsDashboard history={history} prediction={prediction} />
         </div>
       </div>
     </div>

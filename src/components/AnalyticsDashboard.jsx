@@ -74,8 +74,8 @@ export default function AnalyticsDashboard({
         <span className="text-xs text-amber-300">Last 11 spins — weighted</span>
       </div>
 
-      {/* Horizontal card grid — 4 cols on lg, 2 on md, 1 on mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+      {/* Horizontal card grid — 2 cols on md+lg, 1 on mobile */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
         {/* Card 1: Hot Numbers */}
         <div className="bg-gray-700 p-3 rounded-lg">
           <h3 className="text-sm font-semibold text-amber-400 mb-2">

@@ -93,9 +93,8 @@ export default function RecentNumbers({ predictionHistory = [], lossStreak = 0 }
 
           return (
             <div key={entry.ts ?? idx} className="relative group">
-              {/* Number circle with outcome ring */}
               <div
-                className={`${numberBg} ${style.ring} w-11 h-11 flex items-center justify-center rounded-full text-white font-bold text-sm shadow-md transition-transform group-hover:scale-110`}
+                className={`${numberBg} ${style.ring} w-8 h-8 flex items-center justify-center rounded-full text-white font-bold text-xs shadow-md transition-transform group-hover:scale-110`}
                 title={`Spin: ${entry.spin} | Dozen: ${entry.dozen || "0"} | ${
                   entry.outcome
                 }${
