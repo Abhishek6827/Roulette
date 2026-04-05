@@ -1,24 +1,20 @@
 "use client";
 
-import SuggestionDisplay from "./SuggestionDisplay";
-
 export default function AnalyticsDashboard({
   history = [],
-  topDozens = [],
-  dozenCounts = { "1-12": 0, "13-24": 0, "25-36": 0 },
-  onRemoveLast,
+  prediction = null,
 }) {
   const last11Numbers = history.slice(0, 11);
-  const last15Numbers = history.slice(-15);
+  const last15Numbers = history.slice(0, 15);
 
   // Frequency Map for hot numbers
   const freqMap = {};
   last15Numbers.forEach((n) => (freqMap[n] = (freqMap[n] || 0) + 1));
 
-  // Sirf hot numbers (3+ occurrences)
+  // Only hot numbers (3+ occurrences)
   const hotNumbers = Object.keys(freqMap)
     .filter((n) => freqMap[n] >= 3)
-    .slice(0, 8); // Max 8 numbers show karo
+    .slice(0, 8);
 
   // Column stats for last 11 numbers
   const columnCountsLast11 = { "Col 1": 0, "Col 2": 0, "Col 3": 0 };
@@ -30,49 +26,65 @@ export default function AnalyticsDashboard({
     }
   });
 
-  // Pattern Detector
-  const dozenTrendLast11 = { "1-12": 0, "13-24": 0, "25-36": 0 };
-  last11Numbers.forEach((num) => {
-    if (num >= 1 && num <= 12) dozenTrendLast11["1-12"]++;
-    else if (num >= 13 && num <= 24) dozenTrendLast11["13-24"]++;
-    else if (num >= 25 && num <= 36) dozenTrendLast11["25-36"]++;
-  });
-
-  const strongestDozen = Object.entries(dozenTrendLast11).sort(
-    (a, b) => b[1] - a[1]
-  )[0];
-
-  let patternMessage = "No clear trend in last 11 spins";
-  if (strongestDozen[1] >= 5) {
-    patternMessage = `Strong trend: ${strongestDozen[0]} (${strongestDozen[1]}/11 spins)`;
-  } else if (strongestDozen[1] === 4) {
-    patternMessage = `Possible trend: ${strongestDozen[0]} (${strongestDozen[1]}/11 spins)`;
-  }
+  // Dozen counts from prediction analysis (weighted + raw)
+  const analysis = prediction?.analysis;
+  const rawCounts = analysis?.frequency?.raw || { "1-12": 0, "13-24": 0, "25-36": 0 };
+  const weightedScores = analysis?.scores || { "1-12": 0, "13-24": 0, "25-36": 0 };
 
   const totalLast11 = last11Numbers.filter((n) => n !== 0).length;
 
+  // Streak & shift info
+  const streak = analysis?.streak;
+  const shift = analysis?.shift;
+
+  // Build pattern message
+  let patternMessage = "No clear trend in last 11 spins";
+  let patternType = "neutral"; // neutral, positive, warning
+
+  if (streak?.isActive && streak.streakLength >= 3) {
+    patternMessage = `🔥 Strong streak: ${streak.streakDozen} (${streak.streakLength} consecutive)`;
+    patternType = "positive";
+  } else if (streak?.isActive && streak.streakLength >= 2) {
+    patternMessage = `📈 Building streak: ${streak.streakDozen} (${streak.streakLength} consecutive)`;
+    patternType = "positive";
+  } else if (shift?.stage === "confirmed_shift") {
+    patternMessage = `⚡ Confirmed shift to ${shift.shiftDozen}`;
+    patternType = "positive";
+  } else if (shift?.stage === "possible_shift") {
+    patternMessage = `⚠️ Possible shift to ${shift.shiftDozen} — monitoring`;
+    patternType = "warning";
+  } else if (shift?.stage === "alert") {
+    patternMessage = `👀 Shift alert: ${shift.shiftDozen} appearing after absence`;
+    patternType = "warning";
+  } else {
+    // Fallback to frequency-based message
+    const sorted = Object.entries(rawCounts).sort((a, b) => b[1] - a[1]);
+    if (sorted[0][1] >= 5) {
+      patternMessage = `Strong trend: ${sorted[0][0]} (${sorted[0][1]}/11 spins)`;
+      patternType = "positive";
+    } else if (sorted[0][1] >= 4) {
+      patternMessage = `Possible trend: ${sorted[0][0]} (${sorted[0][1]}/11 spins)`;
+    }
+  }
+
+  const patternColor =
+    patternType === "positive"
+      ? "text-emerald-300"
+      : patternType === "warning"
+      ? "text-amber-300"
+      : "text-white";
+
   return (
-    <div className="w-full bg-gray-800 bg-opacity-70 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-gray-700">
+    <div className="w-full">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-bold text-white">Analytics Dashboard</h2>
-        {onRemoveLast && (
-          <button
-            onClick={onRemoveLast}
-            aria-label="Undo last number"
-            className="px-3 py-1 text-sm rounded bg-amber-600 text-white hover:bg-amber-500 transition-all"
-          >
-            Undo Last
-          </button>
-        )}
+        <h2 className="text-xl font-bold text-white">Analytics</h2>
       </div>
 
       <div className="text-xs text-amber-300 mb-3 text-center">
-        Based on last 11 spins analysis
+        Last 11 spins — weighted analysis
       </div>
 
-      <SuggestionDisplay topDozens={topDozens} />
-
-      {/* Hot Numbers Only - Clean Layout */}
+      {/* Hot Numbers */}
       <div className="bg-gray-700 p-3 rounded-lg mb-4">
         <h3 className="text-sm font-semibold text-amber-400 mb-2 text-center">
           🔥 Frequent Numbers (Last 15 spins)
@@ -98,25 +110,53 @@ export default function AnalyticsDashboard({
         </div>
       </div>
 
-      {/* Dozen Performance - Last 11 Spins */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        {["1-12", "13-24", "25-36"].map((d) => (
-          <div key={d} className="bg-gray-700 p-2 rounded-lg text-center">
-            <div className="text-xs text-amber-400 mb-1">{d}</div>
-            <div className="text-white font-bold text-lg">
-              {dozenTrendLast11[d]}
-            </div>
-            <div className="text-xs text-gray-400">
-              {totalLast11
-                ? ((dozenTrendLast11[d] / totalLast11) * 100).toFixed(0)
-                : 0}
-              %
-            </div>
-          </div>
-        ))}
+      {/* Dozen Performance — Raw + Weighted */}
+      <div className="bg-gray-700 p-3 rounded-lg mb-4">
+        <h3 className="text-sm font-semibold text-amber-400 mb-2 text-center">
+          📊 Dozen Performance
+        </h3>
+        <div className="grid grid-cols-3 gap-2">
+          {["1-12", "13-24", "25-36"].map((d) => {
+            const isB = prediction?.bDozen === d;
+            const isA = prediction?.aDozens?.includes(d);
+            const ringClass = isB
+              ? "ring-2 ring-red-500/60"
+              : isA
+              ? "ring-2 ring-emerald-500/60"
+              : "";
+            const labelClass = isB
+              ? "text-red-400"
+              : isA
+              ? "text-emerald-400"
+              : "text-amber-400";
+
+            return (
+              <div
+                key={d}
+                className={`bg-gray-800 p-2 rounded-lg text-center ${ringClass} transition-all`}
+              >
+                <div className={`text-xs font-bold mb-1 ${labelClass}`}>
+                  {d}
+                  {isA && <span className="ml-1 text-[9px] opacity-70">(A)</span>}
+                  {isB && <span className="ml-1 text-[9px] opacity-70">(B)</span>}
+                </div>
+                <div className="text-white font-bold text-lg">{rawCounts[d]}</div>
+                <div className="text-xs text-gray-400">
+                  {totalLast11
+                    ? ((rawCounts[d] / totalLast11) * 100).toFixed(0)
+                    : 0}
+                  %
+                </div>
+                <div className="text-[10px] text-gray-500 mt-0.5">
+                  Score: {(weightedScores[d] || 0).toFixed(1)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Column Performance - Last 11 Spins */}
+      {/* Column Performance */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         {["Col 1", "Col 2", "Col 3"].map((col) => (
           <div key={col} className="bg-gray-700 p-2 rounded-lg text-center">
@@ -137,15 +177,37 @@ export default function AnalyticsDashboard({
       {/* Pattern Detection */}
       <div className="bg-gray-700 p-3 rounded-lg">
         <h3 className="text-sm font-semibold text-amber-400 mb-2 text-center">
-          📊 Pattern Insight
+          🔍 Pattern Detection
         </h3>
-        <div className="text-white text-sm text-center">{patternMessage}</div>
+        <div className={`text-sm text-center font-medium ${patternColor}`}>
+          {patternMessage}
+        </div>
+
+        {/* Last 5 dozens sequence */}
+        {analysis?.last5Dozens && analysis.last5Dozens.length > 0 && (
+          <div className="mt-2 flex items-center justify-center gap-1">
+            <span className="text-[10px] text-gray-500 mr-1">Recent:</span>
+            {analysis.last5Dozens.map((d, i) => (
+              <span
+                key={i}
+                className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                  d === prediction?.bDozen
+                    ? "bg-red-600/30 text-red-300"
+                    : "bg-emerald-600/30 text-emerald-300"
+                }`}
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="text-xs text-gray-400 text-center mt-2">
-          Based on last 11 spins data
+          Streak, shift & trend analysis
         </div>
       </div>
 
-      {/* Statistics Summary */}
+      {/* Summary */}
       <div className="bg-gray-700 p-3 rounded-lg mt-3">
         <h3 className="text-sm font-semibold text-amber-400 mb-2 text-center">
           📈 Summary
@@ -157,8 +219,8 @@ export default function AnalyticsDashboard({
           <div className="text-gray-300">Last 11 Spins:</div>
           <div className="text-white font-medium">{last11Numbers.length}</div>
 
-          <div className="text-gray-300">Analysis Based:</div>
-          <div className="text-white font-medium">Last 11 spins</div>
+          <div className="text-gray-300">Analysis:</div>
+          <div className="text-white font-medium">Weighted + Pattern</div>
         </div>
       </div>
     </div>
