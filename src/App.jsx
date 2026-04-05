@@ -14,18 +14,20 @@ const PREDICTION_HISTORY_CAP = 30; // store last 30 prediction outcomes
 
 /**
  * Count consecutive losses from the most recent entry backward.
- * WAIT entries are skipped (no bet was placed).
- * Stops counting at the first WIN.
+ * WAIT entries BREAK the streak — if the system told you not to bet,
+ * the loss streak resets so the system can recover.
+ * WIN entries also break the streak.
  */
 function countLossStreak(predHistory) {
   let streak = 0;
   for (const entry of predHistory) {
     if (entry.outcome === "LOSS") {
       streak++;
-    } else if (entry.outcome === "WIN") {
-      break; // stop at first win
+    } else {
+      // Both WIN and WAIT break the streak
+      // WAIT = no bet placed, so streak resets
+      break;
     }
-    // WAIT entries are skipped — no bet was placed
   }
   return streak;
 }
@@ -222,8 +224,8 @@ export default function App() {
           </h1>
         </header>
 
-        {/* Main Content — responsive grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+        {/* Main Content — responsive grid, items-start prevents dead-space stretching */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 items-start">
           {/* Wheel — hidden on mobile, shown on md+ */}
           <div className="hidden md:flex lg:col-span-1 bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700 flex-col items-center">
             <RouletteWheel onSpinResult={handleSpinResult} size={240} />

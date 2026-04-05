@@ -335,9 +335,12 @@ export function shouldBetOrWait(analysis, lossStreak, confidence) {
     };
   }
 
-  // ── WAIT: 2 losses ──
-  if (lossStreak === 2) {
-    reasons.push("2 consecutive losses — re-evaluating");
+  // ── 2 losses: WAIT only if confidence is not HIGH ──
+  if (lossStreak === 2 && confidence !== "HIGH") {
+    return {
+      action: "WAIT",
+      reason: "2 consecutive losses with uncertain pattern — re-evaluating.",
+    };
   }
 
   // ── WAIT: LOW confidence ──
@@ -363,17 +366,16 @@ export function shouldBetOrWait(analysis, lossStreak, confidence) {
   if (last5Dozens.length >= 4) {
     const unique = new Set(last5Dozens);
     if (unique.size === 3) {
-      // All 3 dozens hit in last 4-5 spins → fluctuation
       reasons.push("All three dozens active recently — fluctuation detected");
     }
   }
 
-  // Decide
-  if (reasons.length > 0 && (confidence === "LOW" || lossStreak >= 2)) {
+  // If LOW confidence and any reason exists → WAIT
+  if (reasons.length > 0 && confidence === "LOW") {
     return { action: "WAIT", reason: reasons.join(". ") + "." };
   }
 
-  // ── BET: pattern is clear ──
+  // ── BET: pattern is clear enough ──
   let betReason = "";
 
   if (streak.isActive && streak.streakLength >= 2) {
@@ -389,6 +391,8 @@ export function shouldBetOrWait(analysis, lossStreak, confidence) {
 
   if (lossStreak === 1) {
     betReason += " (1 loss — cautious)";
+  } else if (lossStreak === 2) {
+    betReason += " (2 losses — HIGH confidence override)";
   }
 
   if (reasons.length > 0) {
