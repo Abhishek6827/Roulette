@@ -272,11 +272,11 @@ export default function App() {
                 <RecentNumbers predictionHistory={predictionHistory} lossStreak={lossStreak} />
               </div>
               <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+                <PredictionPanel prediction={prediction} lossStreak={lossStreak} />
+              </div>
+              <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
                 <AnalyticsDashboard history={history} prediction={prediction} />
               </div>
-            </div>
-            <div className="md:w-[340px] md:flex-shrink-0 bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
-              <PredictionPanel prediction={prediction} lossStreak={lossStreak} />
             </div>
           </div>
         </div>
