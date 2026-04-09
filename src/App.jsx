@@ -267,19 +267,15 @@ export default function App() {
 
           {/* Row 2: History & Analytics (Left) + Prediction (Right) */}
           <div className="flex flex-col md:flex-row gap-2 sm:gap-3">
-            <div className="flex-1">
+            <div className="flex-1 flex flex-col gap-2 sm:gap-3">
               <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
                 <RecentNumbers predictionHistory={predictionHistory} lossStreak={lossStreak} />
               </div>
-            </div>
-            <div className="md:flex-1">
-              <div className="flex flex-col gap-2 sm:gap-3">
-                <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
-                  <PredictionPanel prediction={prediction} lossStreak={lossStreak} />
-                </div>
-                <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
-                  <AnalyticsDashboard history={history} prediction={prediction} />
-                </div>
+              <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+                <PredictionPanel prediction={prediction} lossStreak={lossStreak} />
+              </div>
+              <div className="bg-gray-800/50 backdrop-blur-md rounded-xl p-2 sm:p-3 border border-gray-700">
+                <AnalyticsDashboard history={history} prediction={prediction} />
               </div>
             </div>
           </div>
